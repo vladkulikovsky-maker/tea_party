@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Чай для кента 🏳️‍🌈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;700;800&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --rainbow:linear-gradient(100deg,#ff5a5f,#ff9f43,#ffd23f,#4ecb71,#2f9bff,#9b6dff,#ff6cab);
+    --ink:#f5f1ff; --muted:#a89fc4; --faint:#6f6790;
+    --glass:rgba(255,255,255,.06); --glass-hi:rgba(255,255,255,.10);
+    --stroke:rgba(255,255,255,.12); --stroke-hi:rgba(255,255,255,.22);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:'Onest',system-ui,-apple-system,sans-serif;
+    color:var(--ink); background:#0a0812;
+    min-height:100svh; display:flex; align-items:center; justify-content:center;
+    padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
+    overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  }
+
+  .aurora{position:fixed; inset:-20%; z-index:0; filter:blur(70px); opacity:.55; pointer-events:none;}
+  .blob{position:absolute; width:46vmax; height:46vmax; border-radius:50%; mix-blend-mode:screen;}
+  .b1{background:#ff5a5f; top:-10%; left:-8%; animation:drift1 18s ease-in-out infinite;}
+  .b2{background:#2f9bff; bottom:-12%; right:-6%; animation:drift2 22s ease-in-out infinite;}
+  .b3{background:#9b6dff; top:30%; right:18%; animation:drift3 20s ease-in-out infinite;}
+  .b4{background:#4ecb71; bottom:8%; left:14%; animation:drift1 26s ease-in-out infinite reverse;}
+  .b5{background:#ffd23f; top:6%; right:30%; width:30vmax; height:30vmax; animation:drift2 24s ease-in-out infinite;}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(8vmax,6vmax) scale(1.15);}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1.1);}50%{transform:translate(-7vmax,-5vmax) scale(.9);}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(.95);}50%{transform:translate(-5vmax,7vmax) scale(1.2);}}
+
+  canvas#confetti{position:fixed; inset:0; pointer-events:none; z-index:30;}
+
+  .app{position:relative; z-index:10; width:100%; max-width:430px;}
+  .appbar{display:flex; align-items:center; gap:12px; padding:4px 4px 18px;}
+  .appicon{width:54px; height:54px; border-radius:30%; background:var(--rainbow);
+    display:grid; place-items:center; box-shadow:0 10px 30px rgba(155,109,255,.45); flex-shrink:0;}
+  .appicon svg{width:30px; height:30px;}
+  .appname{font-family:'Unbounded',sans-serif; font-weight:700; font-size:19px; line-height:1.1; letter-spacing:.01em;}
+  .appname small{display:block; font-family:'Onest',sans-serif; font-weight:500; font-size:12px; color:var(--muted); letter-spacing:.04em; margin-top:3px;}
+
+  .track{height:6px; border-radius:6px; background:rgba(255,255,255,.08); overflow:hidden; margin-bottom:18px;}
+  .fill{height:100%; width:33%; border-radius:6px; background:var(--rainbow);
+    transition:width .6s cubic-bezier(.22,1,.36,1); box-shadow:0 0 14px rgba(255,108,171,.6);}
+
+  .card{background:var(--glass); border:1px solid var(--stroke); border-radius:26px;
+    padding:26px 22px 30px; backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
+    box-shadow:0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);}
+
+  .screen{display:none;}
+  .screen.active{display:block; animation:screenIn .55s cubic-bezier(.22,1,.36,1);}
+  @keyframes screenIn{from{opacity:0; transform:translateY(20px) scale(.97);} to{opacity:1; transform:none;}}
+
+  .eyebrow{font-family:'Unbounded',sans-serif; font-weight:500; font-size:11px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase;}
+  .q{font-family:'Unbounded',sans-serif; font-weight:700; font-size:23px; line-height:1.25; margin:8px 0 18px;}
+
+  .frame{background:linear-gradient(180deg,#fbf8ff,#efe8fa); border-radius:18px; padding:6px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 6px 20px rgba(0,0,0,.2); margin-bottom:18px;}
+  .frame svg{display:block; width:100%; height:auto; border-radius:13px;}
+
+  .qbox{position:relative; height:210px; margin-top:8px;}
+  .btn{font-family:'Onest',sans-serif; font-weight:700; cursor:pointer; border:none;}
+  .btn-yes,.btn-no{position:absolute; left:50%; margin-left:-105px; width:210px; height:58px;
+    display:grid; place-items:center; font-size:17px; border-radius:16px; white-space:nowrap;
+    transition:transform .14s ease, box-shadow .2s ease;}
+  .btn-yes{top:16px; color:#1a0f24; background:var(--rainbow); box-shadow:0 12px 30px rgba(255,108,171,.4);}
+  .btn-yes:hover{box-shadow:0 16px 40px rgba(255,108,171,.55);}
+  .btn-yes:active{transform:scale(.95);}
+  .btn-no{top:136px; color:var(--ink); background:var(--glass-hi); border:1px solid var(--stroke-hi);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    transition:left .2s ease, top .2s ease, transform .14s ease;}
+
+  .teas{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
+  .tea{position:relative; display:flex; align-items:center; gap:11px; padding:15px 14px; cursor:pointer;
+    background:var(--glass); border:1px solid var(--stroke); border-radius:16px; color:var(--ink);
+    font-family:'Onest',sans-serif; font-weight:600; font-size:15px; text-align:left;
+    transition:transform .15s ease, border-color .2s ease, background .2s ease;}
+  .tea:hover{border-color:var(--stroke-hi); background:var(--glass-hi);}
+  .tea.sel{transform:translateY(-2px);
+    background:linear-gradient(var(--glass-hi),var(--glass-hi)) padding-box,var(--rainbow) border-box;
+    border:1.5px solid transparent; box-shadow:0 10px 26px rgba(155,109,255,.3);}
+  .swatch{width:30px; height:30px; border-radius:10px; flex-shrink:0; display:grid; place-items:center;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);}
+  .swatch svg{width:18px; height:18px;}
+  .check{position:absolute; top:8px; right:8px; width:20px; height:20px; border-radius:50%;
+    background:var(--rainbow); display:none; place-items:center; color:#1a0f24; font-size:12px; font-weight:800;}
+  .tea.sel .check{display:grid; animation:pop .3s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes pop{from{transform:scale(0);}to{transform:scale(1);}}
+
+  .fields{display:flex; gap:11px; flex-wrap:wrap; margin-bottom:6px;}
+  .field{flex:1; min-width:140px;}
+  .field label{display:block; font-size:12px; color:var(--muted); margin:0 0 7px 4px; font-weight:500;}
+  input[type=date],input[type=time]{width:100%; font-family:'Onest',sans-serif; font-size:15px; color:var(--ink);
+    padding:14px 14px; border-radius:14px; border:1px solid var(--stroke); background:var(--glass);
+    color-scheme:dark; transition:border-color .2s ease;}
+  input:focus{outline:none; border-color:var(--stroke-hi); box-shadow:0 0 0 3px rgba(155,109,255,.3);}
+
+  .cta{display:block; width:100%; font-family:'Unbounded',sans-serif; font-weight:500; font-size:17px;
+    padding:17px; border-radius:16px; border:none; cursor:pointer; color:#1a0f24; background:var(--rainbow);
+    margin-top:20px; box-shadow:0 12px 30px rgba(255,108,171,.4); transition:transform .14s ease, box-shadow .2s ease;}
+  .cta:active{transform:scale(.97);}
+
+  #screenResult{text-align:center;}
+  .ticket-badge{width:84px; height:84px; border-radius:50%; margin:6px auto 14px; background:var(--rainbow);
+    display:grid; place-items:center; box-shadow:0 14px 38px rgba(255,108,171,.5); animation:pop .5s cubic-bezier(.34,1.56,.64,1);}
+  .ticket-badge svg{width:42px; height:42px;}
+  .done-title{font-family:'Unbounded',sans-serif; font-weight:800; font-size:26px; margin:0 0 4px;}
+  .done-sub{color:var(--muted); font-size:14px; margin:0 0 18px;}
+  .rows{text-align:left; border:1px solid var(--stroke); border-radius:16px; overflow:hidden; margin-bottom:6px;}
+  .rrow{display:flex; align-items:center; gap:12px; padding:15px 16px;}
+  .rrow + .rrow{border-top:1px dashed var(--stroke);}
+  .rrow .ic{width:34px; height:34px; border-radius:10px; background:var(--glass-hi); display:grid; place-items:center; flex-shrink:0;}
+  .rrow .ic svg{width:18px; height:18px;}
+  .rrow .lbl{font-size:12px; color:var(--muted);}
+  .rrow .val{font-weight:700; font-size:16px;}
+  #rStatus{font-size:12.5px; color:var(--faint); margin:14px 0 0;}
+  .again{margin-top:14px; background:var(--glass); border:1px solid var(--stroke); color:var(--muted);
+    font-family:'Onest',sans-serif; font-weight:600; font-size:14px; padding:13px 22px; border-radius:14px; cursor:pointer;}
+  .again:active{transform:scale(.96);}
+
+  .foot{text-align:center; color:var(--faint); font-size:11px; margin-top:16px; letter-spacing:.02em;}
+  .steam{animation:steam 3s ease-in-out infinite;}
+  @keyframes steam{0%,100%{opacity:.6; transform:translateY(0);}50%{opacity:1; transform:translateY(-3px);}}
+
+  :focus-visible{outline:2px solid #ff9f43; outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){
+    .aurora .blob,.steam,.screen.active,.ticket-badge,.tea.sel .check{animation:none;}
+    .fill,.btn,.tea,.cta{transition:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span><span class="blob b5"></span>
+  </div>
+  <canvas id="confetti"></canvas>
+
+  <main class="app">
+    <div class="appbar">
+      <div class="appicon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M7 12h15v6a7 7 0 0 1-14 0z" fill="#fff"/>
+          <path d="M22 13.5q5 0 5 4.5t-5 4.5" stroke="#fff" stroke-width="2.4" fill="none"/>
+          <rect x="6" y="26" width="17" height="2.6" rx="1.3" fill="#fff"/>
+          <path d="M11 9q-2 -2.4 0 -4.8M15 9q-2 -2.4 0 -4.8M19 9q-2 -2.4 0 -4.8" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="appname">Чай для кента<small>опросник для своих 🏳️‍🌈</small></div>
+    </div>
+
+    <div class="track"><div class="fill" id="fill"></div></div>
+
+    <div class="card">
+
+      <!-- ЭКРАН 1 : кто-то протягивает чашку -->
+      <section class="screen active" id="screen1">
+        <div class="frame">
+          <svg viewBox="0 0 300 180" aria-hidden="true">
+            <defs>
+              <radialGradient id="s1g" cx="50%" cy="42%" r="62%"><stop offset="0" stop-color="#ffe6c7"/><stop offset="1" stop-color="#ffe6c7" stop-opacity="0"/></radialGradient>
+              <linearGradient id="s1ka" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4cba7"/><stop offset="1" stop-color="#e2a378"/></linearGradient>
+              <linearGradient id="s1kb" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d49a6c"/><stop offset="1" stop-color="#b87c4c"/></linearGradient>
+              <linearGradient id="s1ha" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6f4a2c"/><stop offset="1" stop-color="#472f19"/></linearGradient>
+              <linearGradient id="s1hb" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#33243a"/><stop offset="1" stop-color="#181019"/></linearGradient>
+              <linearGradient id="s1bl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4aa6ff"/><stop offset="1" stop-color="#2c79cf"/></linearGradient>
+              <linearGradient id="s1pk" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff80b8"/><stop offset="1" stop-color="#e7548f"/></linearGradient>
+            </defs>
+            <rect width="300" height="180" fill="#fbf8ff"/>
+            <circle cx="150" cy="78" r="118" fill="url(#s1g)"/>
+            <ellipse cx="150" cy="168" rx="120" ry="11" fill="#3a2a4a" opacity=".08"/>
+            <g>
+              <path d="M104 132 q26 -6 40 8" fill="none" stroke="url(#s1bl)" stroke-width="16" stroke-linecap="round"/>
+              <path d="M58 178 C56 140 70 124 88 124 C106 124 120 140 118 178 Z" fill="url(#s1bl)"/>
+              <path d="M88 124 C100 124 112 134 116 152 L116 178 L100 178 C104 150 98 132 88 124Z" fill="#000" opacity=".07"/>
+              <path d="M80 118 h16 v10 q-8 5 -16 0 z" fill="url(#s1kb)"/>
+              <ellipse cx="88" cy="98" rx="20" ry="22" fill="url(#s1ka)"/>
+              <circle cx="69" cy="100" r="4" fill="url(#s1kb)"/>
+              <path d="M67 96 C64 74 112 74 109 98 C110 86 104 78 88 78 C74 78 70 84 67 96 Z" fill="url(#s1ha)"/>
+              <path d="M70 88 q18 -12 38 -2" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/>
+              <path d="M83 92 q4 -3 8 0" stroke="#3a2a1c" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M96 92 q4 -3 8 0" stroke="#3a2a1c" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="88" cy="99" rx="2.4" ry="3" fill="#2b2030"/>
+              <ellipse cx="100" cy="99" rx="2.4" ry="3" fill="#2b2030"/>
+              <path d="M94 103 q2 3 0 5" stroke="#c98a5e" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <path d="M89 110 q6 5 12 0" stroke="#9c5b3a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="82" cy="107" rx="4" ry="2.6" fill="#ff7e8a" opacity=".25"/>
+              <ellipse cx="104" cy="107" rx="4" ry="2.6" fill="#ff7e8a" opacity=".25"/>
+            </g>
+            <g>
+              <path d="M182 178 C180 140 194 124 212 124 C230 124 244 140 242 178 Z" fill="url(#s1pk)"/>
+              <path d="M212 124 C200 124 188 134 184 152 L184 178 L200 178 C196 150 202 132 212 124Z" fill="#000" opacity=".07"/>
+              <path d="M204 118 h16 v10 q-8 5 -16 0 z" fill="url(#s1kb)"/>
+              <path d="M196 132 q-20 -8 -24 -28" fill="none" stroke="url(#s1pk)" stroke-width="15" stroke-linecap="round"/>
+              <circle cx="171" cy="100" r="7" fill="url(#s1kb)"/>
+              <ellipse cx="212" cy="98" rx="20" ry="22" fill="url(#s1kb)"/>
+              <circle cx="231" cy="100" r="4" fill="url(#s1kb)"/>
+              <path d="M191 96 C188 74 236 74 233 98 C234 86 228 78 212 78 C198 78 194 84 191 96 Z" fill="url(#s1hb)"/>
+              <path d="M196 86 q18 -12 36 -2" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="3" stroke-linecap="round"/>
+              <path d="M199 92 q4 -3 8 0" stroke="#1a1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M216 92 q4 -3 8 0" stroke="#1a1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="204" cy="99" rx="2.4" ry="3" fill="#1a1020"/>
+              <ellipse cx="220" cy="99" rx="2.4" ry="3" fill="#1a1020"/>
+              <path d="M210 103 q-2 3 0 5" stroke="#9c6a45" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <path d="M205 110 q6 5 12 0" stroke="#7a4a30" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="200" cy="107" rx="4" ry="2.6" fill="#ff7e8a" opacity=".22"/>
+              <ellipse cx="224" cy="107" rx="4" ry="2.6" fill="#ff7e8a" opacity=".22"/>
+            </g>
+            <g>
+              <g stroke-width="3.4" fill="none" stroke-linecap="round" class="steam">
+                <path d="M140 96 q-6 -7 0 -14 q6 -7 0 -14" stroke="#ff5a5f"/>
+                <path d="M150 96 q-6 -7 0 -14 q6 -7 0 -14" stroke="#4ecb71"/>
+                <path d="M160 96 q-6 -7 0 -14 q6 -7 0 -14" stroke="#9b6dff"/>
+              </g>
+              <path d="M132 100 h36 v10 a18 18 0 0 1 -36 0 z" fill="#fff" stroke="#3a2a1c" stroke-width="2.4"/>
+              <path d="M168 104 q12 0 12 8 q0 8 -12 8" fill="none" stroke="#3a2a1c" stroke-width="2.4"/>
+              <ellipse cx="150" cy="100" rx="18" ry="4" fill="#8a4f2b"/>
+            </g>
+          </svg>
+        </div>
+        <div class="eyebrow">Вопрос 1 из 4</div>
+        <div class="q">Хочешь ли ты пить чай?</div>
+        <div class="qbox" id="qbox">
+          <button class="btn btn-yes" id="yes">Да, наливай 💚</button>
+          <button class="btn btn-no" id="no">Нет</button>
+        </div>
+      </section>
+
+      <!-- ЭКРАН 2 : выбор среди разных чаёв -->
+      <section class="screen" id="screen2">
+        <div class="frame">
+          <svg viewBox="0 0 300 180" aria-hidden="true">
+            <defs>
+              <radialGradient id="s2g" cx="50%" cy="40%" r="62%"><stop offset="0" stop-color="#e7f6e2"/><stop offset="1" stop-color="#e7f6e2" stop-opacity="0"/></radialGradient>
+              <linearGradient id="s2k" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4cba7"/><stop offset="1" stop-color="#e2a378"/></linearGradient>
+              <linearGradient id="s2h" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3a2a44"/><stop offset="1" stop-color="#1c1422"/></linearGradient>
+              <linearGradient id="s2s" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5ed27f"/><stop offset="1" stop-color="#36a85b"/></linearGradient>
+              <linearGradient id="s2tp" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffb45a"/><stop offset="1" stop-color="#ef9326"/></linearGradient>
+            </defs>
+            <rect width="300" height="180" fill="#f5fbf3"/>
+            <circle cx="150" cy="74" r="116" fill="url(#s2g)"/>
+            <ellipse cx="150" cy="166" rx="118" ry="11" fill="#234d2a" opacity=".06"/>
+            <g>
+              <path d="M112 120 C112 100 128 92 150 92 C172 92 188 100 188 120 Z" fill="url(#s2s)"/>
+              <path d="M150 92 C168 92 184 100 186 120 L168 120 C168 104 160 96 150 92Z" fill="#000" opacity=".06"/>
+              <path d="M142 90 h16 v10 q-8 5 -16 0 z" fill="url(#s2k)"/>
+              <path d="M176 116 q-2 -22 -16 -28" fill="none" stroke="url(#s2s)" stroke-width="15" stroke-linecap="round"/>
+              <ellipse cx="150" cy="68" rx="21" ry="23" fill="url(#s2k)"/>
+              <circle cx="170" cy="70" r="4" fill="url(#s2k)"/>
+              <ellipse cx="159" cy="83" rx="7" ry="5.5" fill="url(#s2k)"/>
+              <path d="M128 66 C124 42 176 42 172 68 C174 54 166 46 150 46 C134 46 130 52 128 66 Z" fill="url(#s2h)"/>
+              <path d="M132 56 q18 -12 36 -2" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="3" stroke-linecap="round"/>
+              <path d="M137 62 q4 -2 8 0" stroke="#1a1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M154 62 q4 -2 8 0" stroke="#1a1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M139 70 q3 2 6 0" stroke="#1a1020" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+              <path d="M156 70 q3 2 6 0" stroke="#1a1020" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+              <path d="M148 74 q2 3 0 5" stroke="#c98a5e" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <path d="M145 80 q5 3 10 0" stroke="#9c5b3a" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="137" cy="76" rx="4" ry="2.5" fill="#ff7e8a" opacity=".22"/>
+              <ellipse cx="163" cy="76" rx="4" ry="2.5" fill="#ff7e8a" opacity=".22"/>
+            </g>
+            <rect x="34" y="120" width="232" height="7" rx="3.5" fill="#caa97e"/>
+            <rect x="34" y="127" width="232" height="13" rx="3" fill="#a9855c"/>
+            <g>
+              <g class="steam" stroke="#ef9326" stroke-width="2.6" fill="none" stroke-linecap="round"><path d="M74 96 q-5 -6 0 -11 q5 -6 0 -11"/></g>
+              <path d="M52 110 q0 -16 22 -16 q22 0 22 16 q0 10 -22 10 q-22 0 -22 -10z" fill="url(#s2tp)" stroke="#8a5a12" stroke-width="2"/>
+              <path d="M52 106 q-11 -2 -12 4 q6 0 12 3" fill="url(#s2tp)" stroke="#8a5a12" stroke-width="2"/>
+              <path d="M96 100 q11 2 8 13" fill="none" stroke="#8a5a12" stroke-width="3"/>
+              <ellipse cx="74" cy="94" rx="10" ry="3" fill="#ffc372" stroke="#8a5a12" stroke-width="2"/>
+              <circle cx="74" cy="89" r="3" fill="#8a5a12"/>
+            </g>
+            <g>
+              <g class="steam" stroke-width="2.2" fill="none" stroke-linecap="round">
+                <path d="M140 113 q-4 -5 0 -9" stroke="#ff5a5f"/><path d="M176 113 q-4 -5 0 -9" stroke="#4ecb71"/><path d="M212 113 q-4 -5 0 -9" stroke="#ff9f43"/>
+              </g>
+              <path d="M128 117 h22 v3 a11 11 0 0 1 -22 0 z" fill="#fff" stroke="#7a4a30" stroke-width="2"/>
+              <ellipse cx="139" cy="117" rx="11" ry="3" fill="#c0392b"/>
+              <path d="M164 117 h22 v3 a11 11 0 0 1 -22 0 z" fill="#fff" stroke="#7a4a30" stroke-width="2"/>
+              <ellipse cx="175" cy="117" rx="11" ry="3" fill="#3a8a3a"/>
+              <path d="M200 117 h22 v3 a11 11 0 0 1 -22 0 z" fill="#fff" stroke="#7a4a30" stroke-width="2"/>
+              <ellipse cx="211" cy="117" rx="11" ry="3" fill="#d98a2b"/>
+            </g>
+          </svg>
+        </div>
+        <div class="eyebrow">Вопрос 2 из 4</div>
+        <div class="q">Какой чай будешь?</div>
+        <div class="teas" id="teas"></div>
+      </section>
+
+      <!-- ЭКРАН 3 : трусики или без (бельё на верёвке) -->
+      <section class="screen" id="screenUndies">
+        <div class="frame">
+          <svg viewBox="0 0 300 180" aria-hidden="true">
+            <defs>
+              <radialGradient id="suG" cx="50%" cy="40%" r="62%"><stop offset="0" stop-color="#ffe3f1"/><stop offset="1" stop-color="#ffe3f1" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="300" height="180" fill="#fdf4fb"/>
+            <circle cx="150" cy="80" r="116" fill="url(#suG)"/>
+            <path d="M20 54 q130 26 260 0" fill="none" stroke="#b9aecb" stroke-width="2.5"/>
+            <g stroke="#9a8fb8" stroke-width="2" stroke-linecap="round">
+              <path d="M70 56 v-9"/><path d="M150 60 v-9"/><path d="M230 56 v-9"/>
+            </g>
+            <!-- трусы 1 (радужные) -->
+            <g>
+              <path d="M48 60 h44 v10 q-10 30 -16 30 q-6 -16 -6 -22 q0 6 -6 22 q-6 0 -16 -30 z" fill="#ff6cab"/>
+              <path d="M48 60 h44 v7 h-44 z" fill="#9b6dff"/>
+            </g>
+            <!-- трусы 2 (боксеры в полоску) -->
+            <g>
+              <path d="M126 64 h48 v16 q0 22 -10 30 l-6 -22 q-4 14 -8 22 q-2 0 -10 -22 q-4 8 -8 22 q-6 0 -10 -30 q0 -8 0 -16 z" fill="#4ecb71"/>
+              <path d="M126 64 h48 v7 h-48 z" fill="#2f9bff"/>
+              <path d="M132 86 h36 M130 94 h40" stroke="#2a8a4e" stroke-width="2"/>
+            </g>
+            <!-- трусы 3 (в горошек) -->
+            <g>
+              <path d="M210 60 h44 v10 q-10 30 -16 30 q-6 -16 -6 -22 q0 6 -6 22 q-6 0 -16 -30 z" fill="#ffd23f"/>
+              <path d="M210 60 h44 v7 h-44 z" fill="#ff9f43"/>
+              <g fill="#d98a2b"><circle cx="222" cy="74" r="2"/><circle cx="234" cy="80" r="2"/><circle cx="244" cy="74" r="2"/><circle cx="228" cy="88" r="2"/></g>
+            </g>
+            <ellipse cx="150" cy="168" rx="118" ry="9" fill="#5a3a52" opacity=".06"/>
+          </svg>
+        </div>
+        <div class="eyebrow">Вопрос 3 из 4</div>
+        <div class="q">Ты будешь в трусиках или без?</div>
+        <div class="teas" id="undies"></div>
+      </section>
+
+      <!-- ЭКРАН 4 : двое за столиком, сзади часы -->
+      <section class="screen" id="screen3">
+        <div class="frame">
+          <svg viewBox="0 0 300 180" aria-hidden="true">
+            <defs>
+              <radialGradient id="s3g" cx="50%" cy="40%" r="62%"><stop offset="0" stop-color="#ece2fb"/><stop offset="1" stop-color="#ece2fb" stop-opacity="0"/></radialGradient>
+              <linearGradient id="s3ka" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4cba7"/><stop offset="1" stop-color="#e2a378"/></linearGradient>
+              <linearGradient id="s3kb" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d49a6c"/><stop offset="1" stop-color="#b87c4c"/></linearGradient>
+              <linearGradient id="s3ha" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6f4a2c"/><stop offset="1" stop-color="#472f19"/></linearGradient>
+              <linearGradient id="s3hb" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#33243a"/><stop offset="1" stop-color="#181019"/></linearGradient>
+              <linearGradient id="s3bl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4aa6ff"/><stop offset="1" stop-color="#2c79cf"/></linearGradient>
+              <linearGradient id="s3pk" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff80b8"/><stop offset="1" stop-color="#e7548f"/></linearGradient>
+              <clipPath id="s3heart"><path d="M150 78 C146 72 138 73 138 79 C138 84 146 89 150 93 C154 89 162 84 162 79 C162 73 154 72 150 78 Z"/></clipPath>
+            </defs>
+            <rect width="300" height="180" fill="#f7f4fe"/>
+            <circle cx="150" cy="72" r="116" fill="url(#s3g)"/>
+            <ellipse cx="150" cy="170" rx="118" ry="10" fill="#2a2344" opacity=".06"/>
+            <g>
+              <circle cx="150" cy="40" r="22" fill="#fff" stroke="#8a79b4" stroke-width="3"/>
+              <g stroke="#c3b8da" stroke-width="2" stroke-linecap="round"><path d="M150 22v3M168 40h-3M150 58v-3M132 40h3"/></g>
+              <path d="M150 40 V28 M150 40 L160 44" stroke="#3a2a44" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+              <circle cx="150" cy="40" r="2.4" fill="#3a2a44"/>
+            </g>
+            <g>
+              <path d="M58 150 C56 122 72 110 92 110 C112 110 126 122 124 150 Z" fill="url(#s3bl)"/>
+              <path d="M84 104 h16 v9 q-8 5 -16 0 z" fill="url(#s3kb)"/>
+              <ellipse cx="92" cy="86" rx="19" ry="21" fill="url(#s3ka)"/>
+              <circle cx="111" cy="88" r="4" fill="url(#s3kb)"/>
+              <path d="M72 84 C69 62 117 62 113 86 C115 74 108 66 92 66 C78 66 74 72 72 84 Z" fill="url(#s3ha)"/>
+              <path d="M88 80 q4 -3 8 0" stroke="#3a2a1c" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M100 80 q4 -3 8 0" stroke="#3a2a1c" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="92" cy="87" rx="2.3" ry="2.9" fill="#2b2030"/>
+              <ellipse cx="104" cy="87" rx="2.3" ry="2.9" fill="#2b2030"/>
+              <path d="M93 99 q6 4 12 0" stroke="#9c5b3a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="86" cy="94" rx="3.6" ry="2.4" fill="#ff7e8a" opacity=".25"/>
+              <ellipse cx="108" cy="94" rx="3.6" ry="2.4" fill="#ff7e8a" opacity=".25"/>
+            </g>
+            <g>
+              <path d="M176 150 C174 122 188 110 208 110 C228 110 244 122 242 150 Z" fill="url(#s3pk)"/>
+              <path d="M200 104 h16 v9 q-8 5 -16 0 z" fill="url(#s3kb)"/>
+              <ellipse cx="208" cy="86" rx="19" ry="21" fill="url(#s3kb)"/>
+              <circle cx="189" cy="88" r="4" fill="url(#s3kb)"/>
+              <path d="M187 84 C184 62 232 62 228 86 C230 74 223 66 208 66 C194 66 190 72 187 84 Z" fill="url(#s3hb)"/>
+              <path d="M192 80 q4 -3 8 0" stroke="#1a1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M204 80 q4 -3 8 0" stroke="#1a1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="196" cy="87" rx="2.3" ry="2.9" fill="#1a1020"/>
+              <ellipse cx="208" cy="87" rx="2.3" ry="2.9" fill="#1a1020"/>
+              <path d="M195 99 q6 4 12 0" stroke="#7a4a30" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <ellipse cx="190" cy="94" rx="3.6" ry="2.4" fill="#ff7e8a" opacity=".22"/>
+              <ellipse cx="212" cy="94" rx="3.6" ry="2.4" fill="#ff7e8a" opacity=".22"/>
+            </g>
+            <g clip-path="url(#s3heart)">
+              <rect x="136" y="70" width="28" height="4.5" fill="#ff5a5f"/><rect x="136" y="74.5" width="28" height="4.5" fill="#ff9f43"/>
+              <rect x="136" y="79" width="28" height="4.5" fill="#ffd23f"/><rect x="136" y="83.5" width="28" height="4.5" fill="#4ecb71"/>
+              <rect x="136" y="88" width="28" height="4.5" fill="#2f9bff"/><rect x="136" y="92.5" width="28" height="4.5" fill="#9b6dff"/>
+            </g>
+            <ellipse cx="150" cy="132" rx="72" ry="15" fill="#b9905f"/>
+            <ellipse cx="150" cy="129" rx="72" ry="14" fill="#d8b888"/>
+            <rect x="146" y="138" width="8" height="22" fill="#a9855c"/>
+            <ellipse cx="150" cy="162" rx="30" ry="6" fill="#8a6a44"/>
+            <g>
+              <g class="steam" stroke="#ef9326" stroke-width="2.4" fill="none" stroke-linecap="round"><path d="M150 116 q-5 -5 0 -10 q5 -5 0 -10"/></g>
+              <path d="M134 124 q0 -13 16 -13 q16 0 16 13 q0 8 -16 8 q-16 0 -16 -8z" fill="#ffb45a" stroke="#8a5a12" stroke-width="2"/>
+              <path d="M166 117 q9 2 7 10" fill="none" stroke="#8a5a12" stroke-width="2.6"/>
+              <ellipse cx="150" cy="111" rx="8" ry="2.6" fill="#ffc372" stroke="#8a5a12" stroke-width="1.6"/>
+              <path d="M104 127 h18 v3 a9 9 0 0 1 -18 0 z" fill="#fff" stroke="#7a4a30" stroke-width="1.8"/>
+              <ellipse cx="113" cy="127" rx="9" ry="2.4" fill="#c0392b"/>
+              <path d="M180 127 h18 v3 a9 9 0 0 1 -18 0 z" fill="#fff" stroke="#7a4a30" stroke-width="1.8"/>
+              <ellipse cx="189" cy="127" rx="9" ry="2.4" fill="#3a8a3a"/>
+            </g>
+          </svg>
+        </div>
+        <div class="eyebrow">Вопрос 4 из 4</div>
+        <div class="q">Когда встречаемся?</div>
+        <div class="fields">
+          <div class="field"><label for="date">Дата</label><input type="date" id="date"></div>
+          <div class="field"><label for="time">Время</label><input type="time" id="time"></div>
+        </div>
+        <button class="cta" id="done">Подтвердить ✨</button>
+      </section>
+
+      <!-- РЕЗУЛЬТАТ -->
+      <section class="screen" id="screenResult">
+        <div class="ticket-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#1a0f24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2 class="done-title">Заметано!</h2>
+        <p class="done-sub">Чайная встреча назначена 🏳️‍🌈</p>
+        <div class="rows">
+          <div class="rrow">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 10h11v4a5.5 5.5 0 0 1-11 0z" fill="#ff9f43"/><path d="M16 11q4 0 4 3.5T16 18" stroke="#ff9f43" stroke-width="2" fill="none"/></svg></span>
+            <div><div class="lbl">Чай</div><div class="val" id="rTea">—</div></div>
+          </div>
+          <div class="rrow">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="16" rx="3" stroke="#9b6dff" stroke-width="2"/><path d="M4 9h16M9 3v4M15 3v4" stroke="#9b6dff" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <div><div class="lbl">Когда</div><div class="val" id="rWhen">—</div></div>
+          </div>
+        </div>
+        <p id="rStatus"></p>
+        <button class="again" id="again">Заполнить заново ↺</button>
+      </section>
+
+    </div>
+    <p class="foot">сделано с любовью для кента</p>
+  </main>
+
+<script>
+(function(){
+  "use strict";
+
+  var BOT_TOKEN = "8495998202:AAHw5nCzvODDOgXtuGuOYcz1sMa93EtKJUo";
+  var CHAT_ID   = "295532787";
+
+  /* имя кента из Telegram (если страница открыта как Web App бота) */
+  var KENT = "Кент", KENT_USER = "";
+  try {
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg) {
+      tg.ready(); tg.expand();
+      var u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+      if (u) {
+        KENT = u.first_name + (u.last_name ? " " + u.last_name : "");
+        KENT_USER = u.username ? " (@" + u.username + ")" : "";
+      }
+    }
+  } catch(e){}
+
+  function sendToTelegram(tea, dateStr, timeStr){
+    var status = document.getElementById('rStatus');
+    if(BOT_TOKEN.indexOf("ВСТАВЬ") === 0 || CHAT_ID.indexOf("ВСТАВЬ") === 0){ status.textContent = "(телеграм не настроен)"; return; }
+    var text = "🏳️‍🌈 " + KENT + KENT_USER + " забронировал вас на чай " + dateStr + " в " + timeStr + "\n\n🍵 Чай: " + tea + "\n🩲 Дресс-код: " + undies;
+    status.textContent = "отправляю в телеграм…";
+    fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+    }).then(function(r){ return r.json(); })
+      .then(function(d){ status.textContent = d.ok ? "отправлено в телеграм ✓" : "не отправилось: " + (d.description || "ошибка"); })
+      .catch(function(){ status.textContent = "не отправилось (нет сети?)"; });
+  }
+
+  var fill = document.getElementById('fill');
+  var widths = { screen1:'25%', screen2:'50%', screenUndies:'75%', screen3:'100%', screenResult:'100%' };
+  function goTo(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    fill.style.width = widths[id] || '100%';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  var no = document.getElementById('no');
+  var yes = document.getElementById('yes');
+  var box = document.getElementById('qbox');
+  var taunts = ['не-а','попробуй ещё','не выйдет','мимо 🙃','ага, щас','хитрюга','не туда','ну попробуй','я быстрее','не сегодня'];
+  var ti = 0;
+  function flee(){
+    var bw = box.clientWidth, bh = box.clientHeight;
+    no.textContent = taunts[ti % taunts.length]; ti++;
+    var nw = no.offsetWidth, nh = no.offsetHeight;
+    var yb = yes.getBoundingClientRect(), qb = box.getBoundingClientRect();
+    var yx = yb.left - qb.left, yy = yb.top - qb.top, yw = yb.width, yh = yb.height;
+    var pad = 12, x = 0, y = 0, sep = false, tries = 0;
+    do {
+      x = Math.random() * Math.max(0, bw - nw);
+      y = Math.random() * Math.max(0, bh - nh);
+      sep = (x + nw + pad < yx) || (x > yx + yw + pad) || (y + nh + pad < yy) || (y > yy + yh + pad);
+      tries++;
+    } while (!sep && tries < 40);
+    if(!sep){ y = Math.min(bh - nh, yy + yh + pad); }
+    no.style.left = x + 'px'; no.style.right = 'auto'; no.style.marginLeft = '0';
+    no.style.top = y + 'px';
+  }
+  ['mouseover','mousedown','focus'].forEach(function(ev){ no.addEventListener(ev, flee); });
+  no.addEventListener('click', function(e){ e.preventDefault(); flee(); });
+  no.addEventListener('touchstart', function(e){ e.preventDefault(); flee(); }, {passive:false});
+  document.getElementById('yes').addEventListener('click', function(){ goTo('screen2'); });
+
+  var teas = [
+    {n:'Пуэр', c:'#7a3b1d'}, {n:'Габа-пуэр', c:'#a64a22'},
+    {n:'Красный', c:'#ff5a5f'}, {n:'Габа', c:'#4ecb71'},
+    {n:'Кумкват', c:'#ff9f43'}, {n:'Другой', c:'#9b6dff'}
+  ];
+  var chosen = null;
+  var grid = document.getElementById('teas');
+  teas.forEach(function(t){
+    var b = document.createElement('button');
+    b.className = 'tea';
+    b.innerHTML = '<span class="swatch" style="background:'+t.c+'"><svg viewBox="0 0 24 24" fill="none"><path d="M5 10h11v4a5.5 5.5 0 0 1-11 0z" fill="#fff"/><path d="M16 11q3.5 0 3.5 3T16 17" stroke="#fff" stroke-width="2" fill="none"/></svg></span><span>'+t.n+'</span><span class="check">✓</span>';
+    b.addEventListener('click', function(){
+      chosen = t.n;
+      Array.prototype.forEach.call(grid.children, function(c){ c.classList.remove('sel'); });
+      b.classList.add('sel');
+      setTimeout(function(){ goTo('screenUndies'); }, 280);
+    });
+    grid.appendChild(b);
+  });
+
+  /* вопрос про трусики */
+  var undiesOpts = [
+    {n:'В трусиках', c:'#ff6cab'}, {n:'Без 🍑', c:'#ffd23f'},
+    {n:'Сюрприз 😏', c:'#9b6dff'}, {n:'Решим на месте', c:'#4ecb71'}
+  ];
+  var undies = null;
+  var ug = document.getElementById('undies');
+  undiesOpts.forEach(function(o){
+    var b = document.createElement('button');
+    b.className = 'tea';
+    b.innerHTML = '<span class="swatch" style="background:'+o.c+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16v3q-4 9 -6 9q-2 -5 -2 -7q0 2 -2 7q-2 0 -6 -9z" fill="#fff"/></svg></span><span>'+o.n+'</span><span class="check">✓</span>';
+    b.addEventListener('click', function(){
+      undies = o.n;
+      Array.prototype.forEach.call(ug.children, function(c){ c.classList.remove('sel'); });
+      b.classList.add('sel');
+      setTimeout(function(){ goTo('screen3'); }, 280);
+    });
+    ug.appendChild(b);
+  });
+
+  document.getElementById('done').addEventListener('click', function(){
+    var d = document.getElementById('date').value;
+    var t = document.getElementById('time').value;
+    if(!d || !t){ alert('Выбери дату и время ⏰'); return; }
+    var dt = new Date(d + 'T' + t);
+    var dateStr = dt.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+    var timeStr = dt.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('rTea').textContent = chosen;
+    document.getElementById('rWhen').textContent = dateStr + ', ' + timeStr;
+    goTo('screenResult'); burst(); sendToTelegram(chosen, dateStr, timeStr);
+  });
+
+  document.getElementById('again').addEventListener('click', function(){ location.reload(); });
+
+  var canvas = document.getElementById('confetti');
+  var ctx = canvas.getContext('2d');
+  var parts = [], raf = null;
+  var colors = ['#ff5a5f','#ff9f43','#ffd23f','#4ecb71','#2f9bff','#9b6dff','#ff6cab'];
+  function size(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+  addEventListener('resize', size); size();
+  function burst(){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    parts = [];
+    for(var i=0;i<160;i++){ parts.push({ x: innerWidth/2, y: innerHeight/3, vx:(Math.random()-0.5)*13, vy:Math.random()*-13-3, s:Math.random()*8+4, c:colors[i%colors.length], rot:Math.random()*6, vr:(Math.random()-0.5)*0.3, life:0 }); }
+    if(!raf) tick();
+  }
+  function tick(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var alive = false;
+    parts.forEach(function(p){
+      p.life++; p.vy += 0.36; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if(p.y < canvas.height + 30 && p.life < 220){ alive = true; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore(); }
+    });
+    if(alive){ raf = requestAnimationFrame(tick); } else { ctx.clearRect(0,0,canvas.width,canvas.height); raf = null; }
+  }
+})();
+</script>
+</body>
+</html>
