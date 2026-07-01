@@ -97,9 +97,10 @@
   .fields{display:flex; gap:11px; flex-wrap:wrap; margin-bottom:6px;}
   .field{flex:1; min-width:140px;}
   .field label{display:block; font-size:12px; color:var(--muted); margin:0 0 7px 4px; font-weight:500;}
-  input[type=date],input[type=time]{width:100%; font-family:'Onest',sans-serif; font-size:15px; color:var(--ink);
+  input[type=date],input[type=time],input[type=text]{width:100%; font-family:'Onest',sans-serif; font-size:15px; color:var(--ink);
     padding:14px 14px; border-radius:14px; border:1px solid var(--stroke); background:var(--glass);
     color-scheme:dark; transition:border-color .2s ease;}
+  input::placeholder{color:var(--faint);}
   input:focus{outline:none; border-color:var(--stroke-hi); box-shadow:0 0 0 3px rgba(155,109,255,.3);}
 
   .cta{display:block; width:100%; font-family:'Unbounded',sans-serif; font-weight:500; font-size:17px;
@@ -224,12 +225,44 @@
             </g>
           </svg>
         </div>
-        <div class="eyebrow">Вопрос 1 из 4</div>
-        <div class="q">Хочешь ли ты пить чай?</div>
+        <div class="eyebrow">Вопрос 1 из 5</div>
+        <div class="q">Хочешь меня забронировать?</div>
         <div class="qbox" id="qbox">
-          <button class="btn btn-yes" id="yes">Да, наливай 💚</button>
+          <button class="btn btn-yes" id="yes">Да, ты мне нужен</button>
           <button class="btn btn-no" id="no">Нет</button>
         </div>
+      </section>
+
+      <!-- ЭКРАН 2 : кофе или чай -->
+      <section class="screen" id="screenDrink">
+        <div class="frame">
+          <svg viewBox="0 0 300 180" aria-hidden="true">
+            <defs><radialGradient id="dkG" cx="50%" cy="40%" r="62%"><stop offset="0" stop-color="#efe2d2"/><stop offset="1" stop-color="#efe2d2" stop-opacity="0"/></radialGradient></defs>
+            <rect width="300" height="180" fill="#fbf7f2"/>
+            <circle cx="150" cy="80" r="116" fill="url(#dkG)"/>
+            <ellipse cx="150" cy="164" rx="118" ry="10" fill="#3a2a1c" opacity=".07"/>
+            <g>
+              <g class="steam" stroke="#8a5a3a" stroke-width="3" fill="none" stroke-linecap="round"><path d="M88 60 q-5 -7 0 -13 q5 -7 0 -13"/><path d="M102 60 q-5 -7 0 -13 q5 -7 0 -13"/></g>
+              <path d="M60 80 h68 v30 a34 34 0 0 1 -68 0 z" fill="#fff" stroke="#5a3a22" stroke-width="3"/>
+              <path d="M128 86 q18 0 18 15 q0 15 -18 15" fill="none" stroke="#5a3a22" stroke-width="3"/>
+              <ellipse cx="94" cy="80" rx="34" ry="7" fill="#6b3f22"/>
+              <ellipse cx="94" cy="80" rx="23" ry="4.5" fill="#8a5a34"/>
+            </g>
+            <g><circle cx="150" cy="98" r="16" fill="#fff" stroke="#c9bdae" stroke-width="2"/><text x="150" y="103" text-anchor="middle" font-family="Onest,sans-serif" font-size="12" font-weight="700" fill="#8a7f70">или</text></g>
+            <g>
+              <g class="steam" stroke="#c98a2b" stroke-width="3" fill="none" stroke-linecap="round"><path d="M198 66 q-5 -7 0 -13 q5 -7 0 -13"/><path d="M212 66 q-5 -7 0 -13 q5 -7 0 -13"/></g>
+              <ellipse cx="206" cy="138" rx="44" ry="8" fill="#e7ddce"/>
+              <path d="M178 90 h56 v14 a28 28 0 0 1 -56 0 z" fill="#fff" stroke="#5a3a22" stroke-width="3"/>
+              <path d="M234 94 q16 0 16 12 q0 12 -16 12" fill="none" stroke="#5a3a22" stroke-width="3"/>
+              <ellipse cx="206" cy="90" rx="28" ry="6" fill="#d98a2b"/>
+              <path d="M222 90 l6 -22" stroke="#a97c3a" stroke-width="1.6" fill="none"/>
+              <rect x="224" y="62" width="9" height="8" rx="1.5" fill="#ffd23f" stroke="#a97c3a" stroke-width="1.4"/>
+            </g>
+          </svg>
+        </div>
+        <div class="eyebrow">Вопрос 2 из 5</div>
+        <div class="q">Что будем пить?</div>
+        <div class="teas" id="drinks"></div>
       </section>
 
       <!-- ЭКРАН 2 : выбор среди разных чаёв -->
@@ -288,9 +321,47 @@
             </g>
           </svg>
         </div>
-        <div class="eyebrow">Вопрос 2 из 4</div>
+        <div class="eyebrow">Вопрос 3 из 5</div>
         <div class="q">Какой чай будешь?</div>
         <div class="teas" id="teas"></div>
+      </section>
+
+      <!-- ЭКРАН 3б : кофейня (ветка кофе) -->
+      <section class="screen" id="screenCafe">
+        <div class="frame">
+          <svg viewBox="0 0 300 180" aria-hidden="true">
+            <defs><radialGradient id="cfG" cx="50%" cy="35%" r="62%"><stop offset="0" stop-color="#e6eefb"/><stop offset="1" stop-color="#e6eefb" stop-opacity="0"/></radialGradient></defs>
+            <rect width="300" height="180" fill="#f5f8fd"/>
+            <circle cx="150" cy="70" r="122" fill="url(#cfG)"/>
+            <ellipse cx="150" cy="166" rx="118" ry="9" fill="#2a3344" opacity=".06"/>
+            <rect x="70" y="52" width="160" height="110" rx="6" fill="#efe7dc" stroke="#cbb9a6" stroke-width="2"/>
+            <rect x="92" y="58" width="116" height="20" rx="5" fill="#2f2440"/>
+            <text x="150" y="73" text-anchor="middle" font-family="Unbounded,sans-serif" font-size="13" font-weight="700" fill="#fff" letter-spacing="2">CAFÉ</text>
+            <rect x="62" y="82" width="176" height="8" rx="3" fill="#7a5c3a"/>
+            <g>
+              <path d="M66 90 h20 v9 a10 10 0 0 1 -20 0 z" fill="#ff5a5f"/>
+              <path d="M90 90 h20 v9 a10 10 0 0 1 -20 0 z" fill="#ff9f43"/>
+              <path d="M114 90 h20 v9 a10 10 0 0 1 -20 0 z" fill="#ffd23f"/>
+              <path d="M138 90 h20 v9 a10 10 0 0 1 -20 0 z" fill="#4ecb71"/>
+              <path d="M162 90 h20 v9 a10 10 0 0 1 -20 0 z" fill="#2f9bff"/>
+              <path d="M186 90 h20 v9 a10 10 0 0 1 -20 0 z" fill="#9b6dff"/>
+              <path d="M210 90 h20 v9 a10 10 0 0 1 -20 0 z" fill="#ff6cab"/>
+            </g>
+            <rect x="84" y="120" width="34" height="30" rx="3" fill="#bcd6f0" stroke="#5a4a6a" stroke-width="2"/>
+            <path d="M84 135 h34 M101 120 v30" stroke="#5a4a6a" stroke-width="1.4"/>
+            <rect x="182" y="120" width="34" height="30" rx="3" fill="#bcd6f0" stroke="#5a4a6a" stroke-width="2"/>
+            <path d="M182 135 h34 M199 120 v30" stroke="#5a4a6a" stroke-width="1.4"/>
+            <path d="M130 116 h40 v46 h-40 z" fill="#cfe2f5" stroke="#5a4a6a" stroke-width="2"/>
+            <circle cx="162" cy="140" r="2.4" fill="#5a4a6a"/>
+            <g><rect x="42" y="140" width="16" height="20" rx="3" fill="#c98a5e"/><path d="M50 140 q-12 -6 -8 -20 M50 140 q12 -4 10 -18 M50 140 q0 -14 0 -22" stroke="#4ecb71" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+          </svg>
+        </div>
+        <div class="eyebrow">Вопрос 3 из 5</div>
+        <div class="q">Где будем пить?</div>
+        <div class="fields">
+          <div class="field" style="min-width:100%"><label for="cafe">Название кофейни</label><input type="text" id="cafe" placeholder="Напр., кофейня на Крещатике"></div>
+        </div>
+        <button class="cta" id="cafeNext">Дальше →</button>
       </section>
 
       <!-- ЭКРАН 3 : трусики или без (бельё на верёвке) -->
@@ -326,7 +397,7 @@
             <ellipse cx="150" cy="168" rx="118" ry="9" fill="#5a3a52" opacity=".06"/>
           </svg>
         </div>
-        <div class="eyebrow">Вопрос 3 из 4</div>
+        <div class="eyebrow">Вопрос 4 из 5</div>
         <div class="q">Ты будешь в трусиках или без?</div>
         <div class="teas" id="undies"></div>
       </section>
@@ -403,7 +474,7 @@
             </g>
           </svg>
         </div>
-        <div class="eyebrow">Вопрос 4 из 4</div>
+        <div class="eyebrow">Вопрос 5 из 5</div>
         <div class="q">Когда встречаемся?</div>
         <div class="fields">
           <div class="field"><label for="date">Дата</label><input type="date" id="date"></div>
@@ -419,16 +490,7 @@
         </div>
         <h2 class="done-title">Заметано!</h2>
         <p class="done-sub">Чайная встреча назначена 🏳️‍🌈</p>
-        <div class="rows">
-          <div class="rrow">
-            <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 10h11v4a5.5 5.5 0 0 1-11 0z" fill="#ff9f43"/><path d="M16 11q4 0 4 3.5T16 18" stroke="#ff9f43" stroke-width="2" fill="none"/></svg></span>
-            <div><div class="lbl">Чай</div><div class="val" id="rTea">—</div></div>
-          </div>
-          <div class="rrow">
-            <span class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="16" rx="3" stroke="#9b6dff" stroke-width="2"/><path d="M4 9h16M9 3v4M15 3v4" stroke="#9b6dff" stroke-width="2" stroke-linecap="round"/></svg></span>
-            <div><div class="lbl">Когда</div><div class="val" id="rWhen">—</div></div>
-          </div>
-        </div>
+        <div class="rows" id="rows"></div>
         <p id="rStatus"></p>
         <button class="again" id="again">Заполнить заново ↺</button>
       </section>
@@ -444,6 +506,8 @@
   var BOT_TOKEN = "8495998202:AAHw5nCzvODDOgXtuGuOYcz1sMa93EtKJUo";
   var CHAT_ID   = "295532787";
 
+  var drink = null, cafe = "";  /* выбранный напиток и кофейня */
+
   /* имя кента из Telegram (если страница открыта как Web App бота) */
   var KENT = "Кент", KENT_USER = "";
   try {
@@ -458,10 +522,12 @@
     }
   } catch(e){}
 
-  function sendToTelegram(tea, dateStr, timeStr){
+  function sendToTelegram(dateStr, timeStr){
     var status = document.getElementById('rStatus');
     if(BOT_TOKEN.indexOf("ВСТАВЬ") === 0 || CHAT_ID.indexOf("ВСТАВЬ") === 0){ status.textContent = "(телеграм не настроен)"; return; }
-    var text = "🏳️‍🌈 " + KENT + KENT_USER + " забронировал вас на чай " + dateStr + " в " + timeStr + "\n\n🍵 Чай: " + tea + "\n🩲 Дресс-код: " + undies;
+    var word = drink === 'Кофе' ? 'кофе' : 'чай';
+    var drinkLine = drink === 'Кофе' ? ("☕ Кофе\n📍 Где: " + cafe) : ("🍵 Чай: " + chosen);
+    var text = "🏳️‍🌈 " + KENT + KENT_USER + " забронировал вас на " + word + " " + dateStr + " в " + timeStr + "\n\n" + drinkLine + "\n🩲 Дресс-код: " + undies;
     status.textContent = "отправляю в телеграм…";
     fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage", {
       method: "POST", headers: {"Content-Type": "application/json"},
@@ -472,7 +538,7 @@
   }
 
   var fill = document.getElementById('fill');
-  var widths = { screen1:'25%', screen2:'50%', screenUndies:'75%', screen3:'100%', screenResult:'100%' };
+  var widths = { screen1:'20%', screenDrink:'40%', screen2:'60%', screenCafe:'60%', screenUndies:'80%', screen3:'100%', screenResult:'100%' };
   function goTo(id){
     document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
@@ -505,7 +571,31 @@
   ['mouseover','mousedown','focus'].forEach(function(ev){ no.addEventListener(ev, flee); });
   no.addEventListener('click', function(e){ e.preventDefault(); flee(); });
   no.addEventListener('touchstart', function(e){ e.preventDefault(); flee(); }, {passive:false});
-  document.getElementById('yes').addEventListener('click', function(){ goTo('screen2'); });
+  document.getElementById('yes').addEventListener('click', function(){ goTo('screenDrink'); });
+
+  /* выбор напитка: кофе или чай */
+  var drinks = [ {n:'Чай 🍵', v:'Чай', c:'#4ecb71'}, {n:'Кофе ☕', v:'Кофе', c:'#7a3b1d'} ];
+  var dg = document.getElementById('drinks');
+  drinks.forEach(function(o){
+    var b = document.createElement('button');
+    b.className = 'tea';
+    b.innerHTML = '<span class="swatch" style="background:'+o.c+'"></span><span>'+o.n+'</span><span class="check">✓</span>';
+    b.addEventListener('click', function(){
+      drink = o.v;
+      Array.prototype.forEach.call(dg.children, function(c){ c.classList.remove('sel'); });
+      b.classList.add('sel');
+      setTimeout(function(){ goTo(o.v === 'Чай' ? 'screen2' : 'screenCafe'); }, 280);
+    });
+    dg.appendChild(b);
+  });
+
+  /* кофейня (ветка кофе) */
+  document.getElementById('cafeNext').addEventListener('click', function(){
+    var c = document.getElementById('cafe').value.trim();
+    if(!c){ alert('Впиши название кофейни ☕'); return; }
+    cafe = c;
+    goTo('screenUndies');
+  });
 
   var teas = [
     {n:'Пуэр', c:'#7a3b1d'}, {n:'Габа-пуэр', c:'#a64a22'},
@@ -547,6 +637,20 @@
     ug.appendChild(b);
   });
 
+  function buildResult(dateStr, timeStr){
+    var cupIc='<svg viewBox="0 0 24 24" fill="none"><path d="M5 10h11v4a5.5 5.5 0 0 1-11 0z" fill="#ff9f43"/><path d="M16 11q4 0 4 3.5T16 18" stroke="#ff9f43" stroke-width="2" fill="none"/></svg>';
+    var pinIc='<svg viewBox="0 0 24 24" fill="none"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" stroke="#4ecb71" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="#4ecb71"/></svg>';
+    var undIc='<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16v3q-4 9 -6 9q-2 -5 -2 -7q0 2 -2 7q-2 0 -6 -9z" fill="#ff6cab"/></svg>';
+    var calIc='<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="16" rx="3" stroke="#9b6dff" stroke-width="2"/><path d="M4 9h16M9 3v4M15 3v4" stroke="#9b6dff" stroke-width="2" stroke-linecap="round"/></svg>';
+    function row(ic,lbl,val){ return '<div class="rrow"><span class="ic">'+ic+'</span><div><div class="lbl">'+lbl+'</div><div class="val">'+val+'</div></div></div>'; }
+    var html = '';
+    if(drink === 'Кофе'){ html += row(cupIc,'Напиток','Кофе ☕'); html += row(pinIc,'Где', cafe || '—'); }
+    else { html += row(cupIc,'Напиток','Чай · ' + chosen); }
+    html += row(undIc,'Дресс-код', undies || '—');
+    html += row(calIc,'Когда', dateStr + ', ' + timeStr);
+    document.getElementById('rows').innerHTML = html;
+  }
+
   document.getElementById('done').addEventListener('click', function(){
     var d = document.getElementById('date').value;
     var t = document.getElementById('time').value;
@@ -554,9 +658,8 @@
     var dt = new Date(d + 'T' + t);
     var dateStr = dt.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
     var timeStr = dt.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('rTea').textContent = chosen;
-    document.getElementById('rWhen').textContent = dateStr + ', ' + timeStr;
-    goTo('screenResult'); burst(); sendToTelegram(chosen, dateStr, timeStr);
+    buildResult(dateStr, timeStr);
+    goTo('screenResult'); burst(); sendToTelegram(dateStr, timeStr);
   });
 
   document.getElementById('again').addEventListener('click', function(){ location.reload(); });
