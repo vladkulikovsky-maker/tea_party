@@ -361,6 +361,10 @@
         <div class="eyebrow">Вопрос 4 из 6</div>
         <div class="q">Какой чай будешь?</div>
         <div class="teas" id="teas"></div>
+        <div id="customTea" style="display:none; margin-top:12px;">
+          <div class="field"><label for="teaOther">Свой вариант</label><input type="text" id="teaOther" placeholder="Напиши, какой именно чай"></div>
+          <button class="cta" id="teaOtherNext" style="margin-top:12px;">Дальше →</button>
+        </div>
         <div class="fact"><span class="fi">🫖</span><span><b>Проверено веками:</b> пуэр настолько старый, что, кажется, помнит тебя ещё маленьким.</span></div>
       </section>
 
@@ -652,17 +656,33 @@
   ];
   var chosen = null;
   var grid = document.getElementById('teas');
+  var customTea = document.getElementById('customTea');
   teas.forEach(function(t){
     var b = document.createElement('button');
     b.className = 'tea';
     b.innerHTML = '<span class="swatch" style="background:'+t.c+'"><svg viewBox="0 0 24 24" fill="none"><path d="M5 10h11v4a5.5 5.5 0 0 1-11 0z" fill="#fff"/><path d="M16 11q3.5 0 3.5 3T16 17" stroke="#fff" stroke-width="2" fill="none"/></svg></span><span>'+t.n+'</span><span class="check">✓</span>';
     b.addEventListener('click', function(){
-      chosen = t.n;
       Array.prototype.forEach.call(grid.children, function(c){ c.classList.remove('sel'); });
       b.classList.add('sel');
-      setTimeout(function(){ goTo('screenUndies'); }, 280);
+      if(t.n === 'Другой'){
+        chosen = null;
+        customTea.style.display = 'block';
+        var inp = document.getElementById('teaOther');
+        inp.focus();
+        customTea.scrollIntoView({behavior:'smooth', block:'nearest'});
+      } else {
+        chosen = t.n;
+        customTea.style.display = 'none';
+        setTimeout(function(){ goTo('screenUndies'); }, 280);
+      }
     });
     grid.appendChild(b);
+  });
+  document.getElementById('teaOtherNext').addEventListener('click', function(){
+    var v = document.getElementById('teaOther').value.trim();
+    if(!v){ alert('Впиши свой вариант чая 🍵'); return; }
+    chosen = v;
+    goTo('screenUndies');
   });
 
   /* вопрос про трусики */
